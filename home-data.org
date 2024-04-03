@@ -1,0 +1,163 @@
+#+TITLE: Big Data? We've got Big Data at home!
+* Introduction
+** About me
+
+Jan Ypma
+
+- Freelance software architect & coach
+- Distributed systems & microservices
+- Domain-driven design
+- Open source enthusiast
+
+=jan@ypmania.net=
+
+These slides: =https://github.com/jypma/home-data/=
+
+* How it all began
+** Seeing the light
+- 2012: First own home
+  * Lot of work to remember to turn off the light
+
+- Introducing our heroes
+  * Arduino
+    + TODO Show stats
+    + TODO Compare ADC to ESP and RP2040
+  * FS20
+    + OOK on 868MHz, show diagram
+    + TODO Try and find old ad
+  * JeeNode
+    + Combines Arduino ATMega328P with RF12B on 868MHz
+    + Meant for FSK, but can be made to send and receive OOK as well
+** Experiment time!
+- Ordered some JeeNodes and FS20 products
+- Before long, were sending FS20 to my lights
+- Receiving FS20 from buttons worked fine too
+- But, regular "noise bursts" received
+- Noise bursts looked a little too regular
+*** Investigating further
+- Falck alarm
+TODO Find an old image
+TODO Find the name of the protocol (in spark?)
+- Less documentation
+- Still good enough quality to receive motion sensor information
+** Putting it together
+- Let's turn the lights off when there's nobody in the room!
+- Wanted central control, easily updated rules
+  + JeeNode connected to already-on computers as proxies
+    * Home server
+    * Media center
+    * Raspberry pi
+  + Java middleware with control DSL
+
+- Some downsides
+  + FS20 is control-only (no feedback if lamp received a command)
+* A heated period
+** Our heating system
+*** Introduction
+- Central heating, one valve per room
+- Wired thermostats in each room to adjust temperature (analog)
+- Single control unit that turns valves on and off
+*** A bad day
+- Controller board failure
+- SMPS chip exploded
+- System out of production
+- Replacement: €5000 (and new thermostats in all rooms)
+*** What's needed for a heating system?
+- TODO Picture of valve
+- 24V to valves
+  + JeeNode with MOSFET
+- A temperature sensor
+  + JeeNode with DHT22
+- Controller software
+  + Let's extend our Java software with heater control
+*** Complexity is growing
+- FS20 lack of confirmation required a custom ACK protocol
+- Potential 4G LTE interference on 868MHz is reducing reliability
+
+TODO graph picture
+* Two revolutions
+** Home assistant and MQTT
+*** Introduction
+- MQTT
+  + /Message Queue Telemetry Transport/
+  + Lightweight binary protocol for broadcasting messages to topics
+  + Not actually a message queue
+  + Open source implementation =mosquitto=
+
+- Home assistant
+  + Python-based web interface for home automation modules
+  + 10+ years of history
+  + Configurable through YAML
+*** Hooking it up
+- Let's see if we can replace our own Java middleware
+  + Reduce Java part to make all JeeNode modules available over MQTT
+  + Register sensors in Home Assistant for MQTT
+  + All logic now in Home Assistant /automations/
+
+TODO graph picture
+** Espressif and the ESP8266
+*** Introduction
+- Chip originally from a family of USB WiFi products
+- /"Let's make this into a cheap dev board!"/
+TODO picture of D1 mini
+- /"Let's build these cheap dev boards into our WiFi switch or lamp!"/
+  + Sonoff switches
+  + Tasmota firmware
+*** Experiment time
+- Purchase some Sonoff switches
+TODO pictures of Sonoff basic, Sonoff mini
+- Flash Tasmota on them
+  + Typically TX, RX, 3V3 and GND are available on the PCB as pads
+  + Often even labelled
+- Autodiscovery in Home Assistant
+*** Rethinking our setup
+- Let's control our lamps with WiFi instead of FS20
+  + Add Sonoff Basic, Sonoff Mini to our fixtures
+  + Dimmers with ESP8266 can be found (but less widely supported by Tasmota)
+
+- Let's measure room temperature over WiFi too
+  + ESP8266 power management is well-understood
+  + The cloned and re-cloned boards are not
+  + Official Wemos D1 mini can sleep on low power
+  + Add Lithium battery charge module
+
+TODO new graph picture here
+* Integration explosion
+** Kodi
+- Media center software
+- REST API
+- Home assistant integration queries the API
+  + Can now react to videos started and stopped
+  + Automatic dimming of lights
+- Let's have a look
+** TV LED strip
+- (around) 2002: Philips AmbiLight
+- With cheaper addressable LED strips, clones soon followed
+- Modern implementation: =Luficerin=
+  + ESP8266 runs firmware that controls the LEDs
+  + Input over UDP or MQTT
+  + Screen grabber software runs with Kodi and sends LED data
+  + Very low latency
+  + MQTT integration to home assistant
+** Solar inverter and battery
+- High electricity tax in Denmark
+- Large price difference between night, day and evening
+- Solution: solar cells with battery
+
+- Huawei "Sun 2000" inverter and battery
+  + Well-documented modbus protocol
+  + Existing integration into Home Assistant
+  + All sensor values available (but needs custom processing)
+** Energy prices (Nordpool)
+** Car charger (e-go)
+** 3D Printer (Prusa MK3S with Octoprint)
+** Nilan (ventilation)
+** Security cameras
+** Doorbell
+* Monitoring and alerting
+* Conclusion
+** It's all about data
+- Prefer devices where you can control the data coming /IN/ and /OUT/
+- Open standards are preferred, but reverse-engineered protocols work fine too
+
+- Why should the internet participate in me turning on a light bulb, or my doorbell ringing?
