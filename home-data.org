@@ -1,6 +1,9 @@
 #+TITLE: Big Data? We've got Big Data at home!
+#+OPTIONS:   H:3 num:t toc:t
+#+BEAMER_THEME: AnnArbor
 * Introduction
-** About me
+** .
+*** About me
 
 Jan Ypma
 
@@ -14,33 +17,37 @@ Jan Ypma
 These slides: =https://github.com/jypma/home-data/=
 
 * How it all began
-** Seeing the light
+** Back to electronics
+*** Seeing the light
 - 2012: First own home
   * Lot of work to remember to turn off the light
 
 - Introducing our heroes
-  * Arduino
-    + TODO Show stats
-    + TODO Compare ADC to ESP and RP2040
-  * FS20
-    + OOK on 868MHz, show diagram
-    + TODO Try and find old ad
-  * JeeNode
-    + Combines Arduino ATMega328P with RF12B on 868MHz
+  * Arduino (=ATMega328=, ~2010)
+    + 32kB ROM, 2kB RAM, 16MHz
+    + Old
+    + ADC holds up fine to newer ESP and RP2040
+  * FS20 (German home automation system, by Conrad and ELV, ~2008)
+    + OOK on 868MHz
+  * JeeNode (~2012)
+    + Combines =ATMega328P= with HopeRF =RF12B= on 868MHz
     + Meant for FSK, but can be made to send and receive OOK as well
-** Experiment time!
+*** Experiment time!
 - Ordered some JeeNodes and FS20 products
-- Before long, were sending FS20 to my lights
+- Before long, were sending FS20 signals to our lights
 - Receiving FS20 from buttons worked fine too
 - But, regular "noise bursts" received
 - Noise bursts looked a little too regular
 *** Investigating further
 - Falck alarm
-TODO Find an old image
-TODO Find the name of the protocol (in spark?)
-- Less documentation
+  + Central control unit
+  + Wireless motion sensors
+  + As it turns out: uses OOK on 868MHz
+  + Looks like /Visonic/ protocol
+- No real documentation
 - Still good enough quality to receive motion sensor information
 ** Putting it together
+*** First integrations
 - Let's turn the lights off when there's nobody in the room!
 - Wanted central control, easily updated rules
   + JeeNode connected to already-on computers as proxies
@@ -61,20 +68,21 @@ TODO Find the name of the protocol (in spark?)
 - Controller board failure
 - SMPS chip exploded
 - System out of production
-- Replacement: €5000 (and new thermostats in all rooms)
-*** What's needed for a heating system?
-- TODO Picture of valve
+- Replacement: *€5000* (and new thermostats in all rooms)
+*** What's needed for controlling a heating system?
+[[file:uponor.jpg]]
 - 24V to valves
   + JeeNode with MOSFET
 - A temperature sensor
-  + JeeNode with DHT22
+  + JeeNode with =DHT22= (AliExpress)
 - Controller software
   + Let's extend our Java software with heater control
 *** Complexity is growing
+#+ATTR_ORG: :width 50%
+ [[file:diag1.png]]
+
 - FS20 lack of confirmation required a custom ACK protocol
 - Potential 4G LTE interference on 868MHz is reducing reliability
-
-TODO graph picture
 * Two revolutions
 ** Home assistant and MQTT
 *** Introduction
@@ -93,23 +101,25 @@ TODO graph picture
   + Reduce Java part to make all JeeNode modules available over MQTT
   + Register sensors in Home Assistant for MQTT
   + All logic now in Home Assistant /automations/
-
-TODO graph picture
 ** Espressif and the ESP8266
 *** Introduction
 - Chip originally from a family of USB WiFi products
 - /"Let's make this into a cheap dev board!"/
-TODO picture of D1 mini
+#+ATTR_ORG: :width 80%
+ [[file:wemos.jpg]]
 - /"Let's build these cheap dev boards into our WiFi switch or lamp!"/
   + Sonoff switches
   + Tasmota firmware
 *** Experiment time
 - Purchase some Sonoff switches
-TODO pictures of Sonoff basic, Sonoff mini
+#+ATTR_ORG: :width 40%
+ [[file:sonoff.jpg]]
+  + /Sonoff Basic/: 240V in, 240V out
+  + /Sonoff Mini/: 240V in, switch in, 240V out
 - Flash Tasmota on them
-  + Typically TX, RX, 3V3 and GND are available on the PCB as pads
-  + Often even labelled
-- Autodiscovery in Home Assistant
+    + Typically TX, RX, 3V3 and GND are available on the PCB as pads
+    + Often even labelled
+  + Autodiscovery in Home Assistant
 *** Rethinking our setup
 - Let's control our lamps with WiFi instead of FS20
   + Add Sonoff Basic, Sonoff Mini to our fixtures
@@ -121,16 +131,24 @@ TODO pictures of Sonoff basic, Sonoff mini
   + Official Wemos D1 mini can sleep on low power
   + Add Lithium battery charge module
 
-TODO new graph picture here
+** Cheap SDR
+*** RF Motion sensors and buttons
+- Not quite 433 MHz
+- RTL-SDR
+*** Our new setup
+#+ATTR_ORG: :width 50%
+ [[file:diag2.png]]
+
 * Integration explosion
-** Kodi
+** Connect all the things
+*** Kodi
 - Media center software
 - REST API
 - Home assistant integration queries the API
   + Can now react to videos started and stopped
   + Automatic dimming of lights
 - Let's have a look
-** TV LED strip
+*** TV LED strip
 - (around) 2002: Philips AmbiLight
 - With cheaper addressable LED strips, clones soon followed
 - Modern implementation: =Luficerin=
@@ -139,25 +157,107 @@ TODO new graph picture here
   + Screen grabber software runs with Kodi and sends LED data
   + Very low latency
   + MQTT integration to home assistant
-** Solar inverter and battery
+*** Solar inverter and battery
 - High electricity tax in Denmark
 - Large price difference between night, day and evening
 - Solution: solar cells with battery
 
 - Huawei "Sun 2000" inverter and battery
-  + Well-documented modbus protocol
+  + Well-documented modbus protocol (over TCP, WiFi)
   + Existing integration into Home Assistant
   + All sensor values available (but needs custom processing)
-** Energy prices (Nordpool)
-** Car charger (e-go)
-** 3D Printer (Prusa MK3S with Octoprint)
-** Nilan (ventilation)
-** Security cameras
-** Doorbell
+*** Energy prices
+- Prices of the Danish market are available [[https://data.nordpoolgroup.com/auction/day-ahead/prices?deliveryDate=latest&deliveryAreas=DK1,DK2&currency=EUR&aggregation=Hourly][online]] from Nordpool
+- Hence, they're also available in Home Assistant
+
+- Let's make sure we always have enough charged battery
+  + Use a [[https://forecast.solar/][web service]] to guess solar output for rest of the day (and tomorrow)
+  + Know estimated house usage from hour to hour
+  + Charge battery if electricity now is cheaper than when we'd need it
+*** Car charger (e-go)
+- Time for a new car
+  - May as well be electric
+  - Integrate the car itself? No... =*=
+
+- Let's get a charger with an open API
+  + =Go-e= car charger with [[https://github.com/goecharger/go-eCharger-API-v2][API on Github]]
+
+- Let's charge with surplus solar energy
+  + New API feature, (still) not documented
+#+BEGIN_SRC js
+{"pPv": 116, "pGrid": 1491, "pAkku": 0}
+#+END_SRC
+  + So, =pPv= must be the solar power, =pGrid= is what we're sending to the grid, and =pAkku= battery... right?
+*** 3D Printer
+- Prusa MK3S with Octoprint on an Orange Pi
+- Want to turn off printer after printing
+  + Octoprint can publish status to MQTT
+  + Integrated to Home Assistant
+  + Turn off printer (through a Sonoff switch) once idle a certain time
+*** Nilan
+- Denmark
+  + Cold during the winter
+  + Well-isolated houses
+  + Need extra active ventilation
+
+- Nilan
+  + Heat exchanger with heat pump
+  + Can cool (a little) during summer, but energy-intensive
+  + Well-documented modbus protocol (over RS485), with several Home Assistant integrations
+  + Let's cool the house down if extra solar power is available
+*** Security cameras
+- Motion-sensing IP cameras
+- Send an MQTT message whenever motion is detected
+- Available in Home Assistant as a =binary sensor=
+*** Doorbell
+- Wemos D1 mini (ESP8266)
+- Same firmware as room sensor (adding button support)
+- Home Assistant automation
+  + Play doorbell sound
+  + Send e-mail if nobody is home
 * Monitoring and alerting
+** Better historic data
+*** Grafana
+- All these sensors and their data
+- Home assistant's history features are rather limited
+- Let's put our metrics somewhere else
+#+BEGIN_SRC yaml
+statsd:
+  host: statsd.lan
+#+END_SRC
+- Grafana for gorgeous dashboards and precision
+** Better communication
+*** Alerts
+- Dashboard are pretty to look at, but we have better things to do with our time
+- Anything worth graphing, is probably worth alerting about
+
+- Send e-mail when
+  + Battery of any of the temperature sensors is getting low
+  + Outside motion sensors haven't seen motion for a while
+  + Any of the raspberry pis can't be pinged
+  + Doorbell is pressed while we're on vacation
+  + Server is about to go out of disk space
+** E-paper display
+*** General status overview
+- Still nice to have a quick overview of things
+  + Grabbing a phone or computer, opening it, navigating, takes way too much time
+  + Always-on solution
+
+- E-paper to the rescue
+  + Has gotten more affordable
+  + Development kits exist with out favorite microcontrollers
+  + /LilyGo T5 4.7"/: E-paper display with ESP32
+*** At a glance
+#+ATTR_ORG: :width 60%
+ [[file:epaper.jpg]]
 * Conclusion
-** It's all about data
+** Wrapping up
+*** It's all about data
 - Prefer devices where you can control the data coming /IN/ and /OUT/
 - Open standards are preferred, but reverse-engineered protocols work fine too
 
 - Why should the internet participate in me turning on a light bulb, or my doorbell ringing?
+
+
+Thank you!
+=jan@ypmania.net=
