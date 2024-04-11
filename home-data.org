@@ -2,15 +2,30 @@
 #+OPTIONS:   H:3 num:t toc:t
 #+BEAMER_THEME: AnnArbor
 * Introduction
-** .
+** Getting started
 *** About me
 
 Jan Ypma
 
+/By day/
 - Freelance software architect & coach
 - Distributed systems & microservices
 - Domain-driven design
 - Open source enthusiast
+
+=jan@ypmania.net=
+
+These slides: =https://github.com/jypma/home-data/=
+*** More about me
+
+Jan Ypma
+
+/Also by day/
+- Electronics tinkerer
+- Type-safe firmware
+- Modular synthesizers
+- Dungeon Master (DnD)
+- Home automation nerd
 
 =jan@ypmania.net=
 
@@ -25,10 +40,12 @@ These slides: =https://github.com/jypma/home-data/=
 - Introducing our heroes
   * Arduino (=ATMega328=, ~2010)
     + 32kB ROM, 2kB RAM, 16MHz
-    + Old
+    + Old, 8-bit
     + ADC holds up fine to newer ESP and RP2040
+
   * FS20 (German home automation system, by Conrad and ELV, ~2008)
     + OOK on 868MHz
+
   * JeeNode (~2012)
     + Combines =ATMega328P= with HopeRF =RF12B= on 868MHz
     + Meant for FSK, but can be made to send and receive OOK as well
@@ -70,7 +87,9 @@ These slides: =https://github.com/jypma/home-data/=
 - System out of production
 - Replacement: *€5000* (and new thermostats in all rooms)
 *** What's needed for controlling a heating system?
-[[file:uponor.jpg]]
+#+ATTR_LATEX: :width 0.3\textwidth
+#+ATTR_ORG: :width 20%
+ [[file:uponor.jpg]]
 - 24V to valves
   + JeeNode with MOSFET
 - A temperature sensor
@@ -78,6 +97,7 @@ These slides: =https://github.com/jypma/home-data/=
 - Controller software
   + Let's extend our Java software with heater control
 *** Complexity is growing
+#+ATTR_LATEX: :width 0.7\textwidth
 #+ATTR_ORG: :width 50%
  [[file:diag1.png]]
 
@@ -105,6 +125,7 @@ These slides: =https://github.com/jypma/home-data/=
 *** Introduction
 - Chip originally from a family of USB WiFi products
 - /"Let's make this into a cheap dev board!"/
+#+ATTR_LATEX: :width 0.5\textwidth
 #+ATTR_ORG: :width 80%
  [[file:wemos.jpg]]
 - /"Let's build these cheap dev boards into our WiFi switch or lamp!"/
@@ -112,6 +133,7 @@ These slides: =https://github.com/jypma/home-data/=
   + Tasmota firmware
 *** Experiment time
 - Purchase some Sonoff switches
+#+ATTR_LATEX: :width 0.5\textwidth
 #+ATTR_ORG: :width 40%
  [[file:sonoff.jpg]]
   + /Sonoff Basic/: 240V in, 240V out
@@ -130,12 +152,23 @@ These slides: =https://github.com/jypma/home-data/=
   + The cloned and re-cloned boards are not
   + Official Wemos D1 mini can sleep on low power
   + Add Lithium battery charge module
+#+ATTR_LATEX: :width 0.2\textwidth
+#+ATTR_ORG: :width 20%
+ [[file:roomsensor.png]]
 
 ** Cheap SDR
 *** RF Motion sensors and buttons
 - Not quite 433 MHz
 - RTL-SDR
+  + RTL2832 chip /(originally for DVB-T reception)/
+  + $10 USB receiver
+  + 48.25 MHz to 1.7 GHz /(up to about 2Mhz bandwidth, actual maximum frequency varies)/
+- =rtl_433= decoding software
+  + Decode detected pulses into JSON
+  + Send this to MQTT
+** Combined
 *** Our new setup
+#+ATTR_LATEX: :width 0.7\textwidth
 #+ATTR_ORG: :width 50%
  [[file:diag2.png]]
 
@@ -248,6 +281,7 @@ statsd:
   + Development kits exist with out favorite microcontrollers
   + /LilyGo T5 4.7"/: E-paper display with ESP32
 *** At a glance
+#+ATTR_LATEX: :width 0.8\textwidth
 #+ATTR_ORG: :width 60%
  [[file:epaper.jpg]]
 * Conclusion
@@ -255,6 +289,10 @@ statsd:
 *** It's all about data
 - Prefer devices where you can control the data coming /IN/ and /OUT/
 - Open standards are preferred, but reverse-engineered protocols work fine too
+- Open source software is crucial
+  + Quality varies, but you can always participate
+- It's not easy (yet...)
+  + Light bulb conspiracies?
 
 - Why should the internet participate in me turning on a light bulb, or my doorbell ringing?
 
