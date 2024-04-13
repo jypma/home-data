@@ -51,6 +51,10 @@ These slides: =https://github.com/jypma/home-data/=
     + Meant for FSK, but can be made to send and receive OOK as well
 *** Experiment time!
 - Ordered some JeeNodes and FS20 products
+#+ATTR_ORG: :width 40%
+#+ATTR_LATEX: :width 0.4\textwidth
+ [[file:fs20.jpg]]
+
 - Before long, were sending FS20 signals to our lights
 - Receiving FS20 from buttons worked fine too
 - But, regular "noise bursts" received
@@ -61,6 +65,10 @@ These slides: =https://github.com/jypma/home-data/=
   + Wireless motion sensors
   + As it turns out: uses OOK on 868MHz
   + Looks like /Visonic/ protocol
+#+ATTR_LATEX: :width 0.3\textwidth
+#+ATTR_ORG: :width 20%
+ [[file:visonic.jpg]]
+
 - No real documentation
 - Still good enough quality to receive motion sensor information
 ** Putting it together
@@ -97,10 +105,9 @@ These slides: =https://github.com/jypma/home-data/=
 - Controller software
   + Let's extend our Java software with heater control
 *** Complexity is growing
-#+ATTR_LATEX: :width 0.7\textwidth
 #+ATTR_ORG: :width 50%
+#+ATTR_LATEX: :width 0.7\textwidth
  [[file:diag1.png]]
-
 - FS20 lack of confirmation required a custom ACK protocol
 - Potential 4G LTE interference on 868MHz is reducing reliability
 * Two revolutions
@@ -168,8 +175,8 @@ These slides: =https://github.com/jypma/home-data/=
   + Send this to MQTT
 ** Combined
 *** Our new setup
-#+ATTR_LATEX: :width 0.7\textwidth
 #+ATTR_ORG: :width 50%
+#+ATTR_LATEX: :width 0.7\textwidth
  [[file:diag2.png]]
 
 * Integration explosion
@@ -292,6 +299,8 @@ statsd:
 - Open source software is crucial
   + Quality varies, but you can always participate
 - It's not easy (yet...)
+  + /Home assistant/: Large python code base, many developers, well-intentioned refactors
+  + /Tasmota/: Multiple embedded platforms, challenges in unit testing
   + Light bulb conspiracies?
 
 - Why should the internet participate in me turning on a light bulb, or my doorbell ringing?
